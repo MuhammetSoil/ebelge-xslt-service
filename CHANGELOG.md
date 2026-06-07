@@ -4,6 +4,8 @@ Bu proje [Semantic Versioning](https://semver.org/) kurallarını takip eder.
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-06-07
+
 ### Eklenen
 
 #### Çalıştırılabilir JAR Release
