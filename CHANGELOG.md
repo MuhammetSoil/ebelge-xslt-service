@@ -2,6 +2,8 @@
 
 Bu proje [Semantic Versioning](https://semver.org/) kurallarını takip eder.
 
+## [Unreleased]
+
 ## [1.3.0] - 2026-03-06
 
 ### Eklenen

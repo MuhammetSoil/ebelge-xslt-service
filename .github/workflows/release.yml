@@ -29,15 +29,38 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Grant Gradle Wrapper Permissions
-        run: chmod +x gradlew
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
-      - name: Build & Test
-        run: ./gradlew build --no-daemon
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
 
       - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Install UI Dependencies
+        working-directory: xslt-web-ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Build UI
+        working-directory: xslt-web-ui
+        run: pnpm build
+
+      - name: Copy UI to Static Resources
+        run: |
+          mkdir -p xslt-web-api/src/main/resources/static
+          cp -r xslt-web-ui/dist/. xslt-web-api/src/main/resources/static/
+
+      - name: Grant Gradle Wrapper Permissions
+        run: chmod +x gradlew
+
+      - name: Build & Test
+        run: ./gradlew build --no-daemon -PskipUi -PappVersion=${{ steps.version.outputs.VERSION }}
 
       - name: Setup .NET 9 SDK
         uses: actions/setup-dotnet@v4
@@ -85,3 +108,5 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          files: |
+            xslt-web-api/build/libs/mersel-xslt-service-*.jar

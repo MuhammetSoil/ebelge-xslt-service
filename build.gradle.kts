@@ -5,9 +5,16 @@ plugins {
     alias(libs.plugins.spring.dependency.management) apply false
 }
 
+// Sürüm, CI/CD'de git tag'inden (-PappVersion=1.2.3) geçirilebilir.
+// Verilmezse aşağıdaki varsayılan kullanılır.
+// NOT: Aşağıdaki `val defaultAppVersion` satırı scripts/release.sh tarafından
+// otomatik bump'lanır; satır formatı korunmalıdır.
+val defaultAppVersion = "1.3.0"
+val appVersion = (findProperty("appVersion") as String?)?.takeIf { it.isNotBlank() } ?: defaultAppVersion
+
 allprojects {
     group = "io.mersel.services"
-    version = "1.0.0"
+    version = appVersion
 
     repositories {
         mavenCentral()

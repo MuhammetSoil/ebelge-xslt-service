@@ -35,6 +35,11 @@ springBoot {
     mainClass.set("io.mersel.services.xslt.web.XsltServiceApplication")
 }
 
+// Çalıştırılabilir release JAR'ı: mersel-xslt-service-<sürüm>.jar
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    archiveBaseName.set("mersel-xslt-service")
+}
+
 // Spring Boot bootJar yanında üretilen gereksiz plain JAR'ı devre dışı bırak
 tasks.named<Jar>("jar") {
     enabled = false
