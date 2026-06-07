@@ -4,6 +4,17 @@ Bu proje [Semantic Versioning](https://semver.org/) kurallarını takip eder.
 
 ## [Unreleased]
 
+### Eklenen
+
+#### Çalıştırılabilir JAR Release
+
+Proje artık her sürüm için tek dosyalık, çalıştırılabilir bir `.jar` (Spring Boot fat JAR) üretip GitHub Release'e ekler.
+
+- **Versiyonlu artifact** — Çıktı `mersel-xslt-service-<sürüm>.jar` adıyla üretilir; web arayüzü (UI) JAR içine gömülüdür, tek dosya self-contained çalışır: `java -jar mersel-xslt-service-<sürüm>.jar`
+- **Tag'den sürüm besleme** — Build sürümü `-PappVersion` ile dışarıdan geçirilebilir; CI/CD release workflow'u sürümü git tag'inden (`v*`) otomatik alır
+- **Otomatik GitHub Release** — `v*` tag push edildiğinde release workflow UI'ı build eder, `.jar` artifact'ını Release'e upload eder (Docker imajı ve .NET NuGet client'ına ek olarak)
+- **Lokal release helper** — `scripts/release.sh` ile lokalde sürüm bump (`patch`/`minor`/`major` veya explicit), CHANGELOG finalize, test/build, signed commit + immutable tag işlemleri tek komutla yapılır; push kullanıcıya bırakılır (`--dry-run` desteği ile)
+
 ## [1.3.0] - 2026-03-06
 
 ### Eklenen
