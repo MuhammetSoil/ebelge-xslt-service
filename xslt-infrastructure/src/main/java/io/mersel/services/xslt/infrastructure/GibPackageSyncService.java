@@ -85,7 +85,7 @@ public class GibPackageSyncService implements IGibPackageSyncService {
             new GibPackageDefinition(
                     "earsiv",
                     "e-Arşiv Paketi",
-                    "https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_6.zip",
+                    "https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_8.zip",
                     List.of(
                             new FileExtraction("*.xsl", "validator/earchive/schematron/"),
                             new FileExtraction("*.xsd", "validator/earchive/schema/")
