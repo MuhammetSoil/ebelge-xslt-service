@@ -5,10 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.ls.LSInput;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("LocalSchemaResourceResolver")
 class LocalSchemaResourceResolverTest {
@@ -92,5 +99,50 @@ class LocalSchemaResourceResolverTest {
 
         assertThat(resolved).isNotNull();
         assertThat(resolved.getSystemId()).isEqualTo(expected.toUri().toString());
+    }
+
+    @Test
+    @DisplayName("bozuk_http_referansi_null_doner — geçersiz URI şema derlemesini kırmamalı")
+    void bozuk_http_referansi_null_doner() {
+        var resolver = new LocalSchemaResourceResolver(tempDir);
+
+        LSInput resolved = resolver.resolveResource(
+                "http://www.w3.org/2001/XMLSchema", null, null,
+                "http://example.org/schema/xmldsig core.xsd", null);
+
+        assertThat(resolved).isNull();
+    }
+
+    @Test
+    @DisplayName("import_edilen_xsd_kendi_encoding_bildirimini_korur — sabit UTF-8 dayatılmamalı")
+    void import_edilen_xsd_kendi_encoding_bildirimini_korur() throws Exception {
+        Path schemaDir = Files.createDirectories(tempDir.resolve("schema"));
+        Files.write(schemaDir.resolve("types.xsd"), """
+                <?xml version="1.0" encoding="windows-1254"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                  <xs:simpleType name="FirmaTipi">
+                    <xs:restriction base="xs:string">
+                      <xs:enumeration value="Şirket"/>
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:schema>
+                """.getBytes(Charset.forName("windows-1254")));
+
+        Path mainXsd = schemaDir.resolve("main.xsd");
+        Files.writeString(mainXsd, """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                  <xs:include schemaLocation="types.xsd"/>
+                  <xs:element name="Firma" type="FirmaTipi"/>
+                </xs:schema>
+                """, StandardCharsets.UTF_8);
+
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        factory.setResourceResolver(new LocalSchemaResourceResolver(schemaDir));
+        var validator = factory.newSchema(new StreamSource(mainXsd.toFile())).newValidator();
+
+        assertThatCode(() -> validator.validate(new StreamSource(new ByteArrayInputStream(
+                "<Firma>Şirket</Firma>".getBytes(StandardCharsets.UTF_8)))))
+                .doesNotThrowAnyException();
     }
 }

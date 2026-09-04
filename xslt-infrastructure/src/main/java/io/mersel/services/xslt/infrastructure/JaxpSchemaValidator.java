@@ -76,6 +76,9 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
      * {@code xs:import} ile ister ama paketle birlikte göndermez. Söz konusu imza
      * şemaları yalnızca genel e-Arşiv paketiyle geldiği için import'lar
      * {@link #EARCHIVE_SHARED_SCHEMA_DIR} üzerinden çözülür.
+     * <p>
+     * Bu paketler GİB tarafından ayrı dağıtıldığı için opsiyoneldir: ilgili ürün
+     * paketi sync edilmemişse {@link #reload()} bunları hata saymaz, atlar.
      */
     private static final Set<SchemaValidationType> EARCHIVE_PRODUCT_TYPES = Set.of(
             SchemaValidationType.EARCHIVE_EDOVIZ,
@@ -180,6 +183,11 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
 
         for (SchemaValidationType type : SchemaValidationType.values()) {
             try {
+                if (isUnsyncedProductSchema(type)) {
+                    log.info("  {} XSD şeması mevcut değil: {} (GİB ürün paketi sync edilmemiş)",
+                            type, MAIN_XSD_MAP.get(type));
+                    continue;
+                }
                 var schema = compileSchema(type);
                 newCache.put(type, schema);
                 log.debug("  {} XSD şeması yüklendi", type);
@@ -202,6 +210,18 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
         } else {
             return ReloadResult.failed(getName(), elapsed, String.join("; ", errors));
         }
+    }
+
+    /**
+     * Ayrı dağıtılan bir GİB ürün paketine ait olup henüz sync edilmemiş şemaları işaretler.
+     * Bu şemaların yokluğu hata değildir; yalnızca ilgili paket kurulmamış demektir.
+     */
+    private boolean isUnsyncedProductSchema(SchemaValidationType type) {
+        if (!EARCHIVE_PRODUCT_TYPES.contains(type)) {
+            return false;
+        }
+        String mainXsd = MAIN_XSD_MAP.get(type);
+        return mainXsd != null && !assetManager.assetExists(mainXsd);
     }
 
     // ── Doğrulama ───────────────────────────────────────────────────

@@ -27,6 +27,9 @@ Bu proje [Semantic Versioning](https://semver.org/) kurallarını takip eder.
 - XSD override'lı doğrulama yolunda lokal şema resolver'ı kurulmuyordu; e-Defter/XBRL şemalarının HTTP `xs:import` referansları artık bu yolda da lokal dosyalara yönleniyor
 - Göreceli `xs:import` / `xs:include` referansları önce bildiren şemanın kendi konumuna göre, sonra arama dizinlerinde göreceli yolun tamamına göre çözümleniyor; yalnızca dosya adı eşleştirilmediği için farklı alt dizinlerdeki aynı adlı şemalar birbirinin yerine yüklenemiyor
 - Dockerfile release JAR'ını `*.jar` joker'i yerine adıyla eşleştiriyor; build context'te kalmış eski JAR'lar image'a alınamıyor
+- Ayrı dağıtılan e-Döviz, e-Dekont ve e-Gider Pusulası paketleri sync edilmemişse XSD ve Schematron reload'u bunları hata saymıyor. Aksi halde bu tipler eklendiği için mevcut her kurulum reload sonrası `PARTIAL` durumuna düşüyordu. Atlama yalnızca dosyanın yokluğunda geçerlidir; dosya mevcut olup derlenemiyorsa hata olarak raporlanmaya devam ediyor
+- Lokal şema resolver'ı, ayrıştırılamayan HTTP `xs:import` referanslarında istisna fırlatıp şema derlemesini kesmiyor; referans çözümlenemedi sayılıp varsayılan davranışa dönülüyor
+- Lokal şema resolver'ı çözdüğü dosyalara sabit `UTF-8` encoding'i dayatmıyor; import edilen şemanın kendi XML bildirimindeki encoding geçerli oluyor
 
 ### Güvenlik
 

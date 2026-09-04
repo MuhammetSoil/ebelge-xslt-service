@@ -188,6 +188,11 @@ class SaxonSchematronValidatorTest {
         assertThat(result.loadedCount()).isEqualTo(0);
         assertThat(result.errors()).isNotEmpty();
         assertThat(result.componentName()).isEqualTo("Schematron Rules");
+
+        // Ayrı dağıtılan GİB ürün paketleri opsiyoneldir — sync edilmemiş olmaları
+        // hata sayılmaz, aksi halde her mevcut kurulum PARTIAL'a düşer.
+        assertThat(String.join(" | ", result.errors()))
+                .doesNotContain(SchematronValidationType.EARCHIVE_REPORT_EDOVIZ.name());
     }
 
     // ── Test 6 ──────────────────────────────────────────────────────────

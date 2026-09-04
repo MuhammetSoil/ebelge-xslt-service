@@ -73,7 +73,13 @@ class LocalSchemaResourceResolver implements LSResourceResolver {
     }
 
     private Path resolveHttpReference(String systemId) {
-        String path = URI.create(systemId).getPath();
+        String path;
+        try {
+            path = URI.create(systemId).getPath();
+        } catch (IllegalArgumentException e) {
+            log.debug("XSD referansı geçerli bir URI değil: {}", systemId);
+            return null;
+        }
         if (path == null || path.isBlank()) {
             return null;
         }
@@ -241,7 +247,11 @@ class LocalSchemaResourceResolver implements LSResourceResolver {
         public void setBaseURI(String baseURI) { }
 
         @Override
-        public String getEncoding() { return "UTF-8"; }
+        public String getEncoding() {
+            // null → encoding'i XML bildirimi belirler. Sabit bir değer döndürmek,
+            // UTF-8 dışı bildirimi olan XSD'leri bozar.
+            return null;
+        }
 
         @Override
         public void setEncoding(String encoding) { }
