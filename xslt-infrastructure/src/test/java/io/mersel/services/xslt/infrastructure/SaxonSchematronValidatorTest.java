@@ -224,22 +224,27 @@ class SaxonSchematronValidatorTest {
             when(assetManager.resolveAssetOnDisk(schPath)).thenReturn(schFile);
         }
 
-        // PRECOMPILED_XSL_MAP: EARCHIVE_REPORT → 1 dosya
-        String earsivPath = "validator/earchive/schematron/earsiv_schematron.xsl";
-        when(assetManager.assetExists(earsivPath)).thenReturn(true);
+        // PRECOMPILED_XSL_MAP: genel e-Arşiv + e-Döviz → 2 dosya
         String simpleXsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
                 + "<xsl:template match='/'/></xsl:stylesheet>";
-        when(assetManager.getAssetStream(earsivPath))
-                .thenReturn(new ByteArrayInputStream(simpleXsl.getBytes(StandardCharsets.UTF_8)));
+        String[] precompiledPaths = {
+                "validator/earchive/schematron/earsiv_schematron.xsl",
+                "validator/earchive-edoviz/schematron/earsiv_schematron.xsl"
+        };
+        for (String precompiledPath : precompiledPaths) {
+            when(assetManager.assetExists(precompiledPath)).thenReturn(true);
+            when(assetManager.getAssetStream(precompiledPath))
+                    .thenReturn(new ByteArrayInputStream(simpleXsl.getBytes(StandardCharsets.UTF_8)));
+        }
 
         ReloadResult result = validator.reload();
 
         assertThat(result.status()).isEqualTo(ReloadResult.Status.OK);
-        // 1 (UBLTR_MAIN) + 6 (SCH) + 1 (EARCHIVE) = 8
-        assertThat(result.loadedCount()).isEqualTo(8);
+        // 1 (UBLTR_MAIN) + 6 (SCH) + 2 (EARCHIVE, EARCHIVE_EDOVIZ) = 9
+        assertThat(result.loadedCount()).isEqualTo(9);
         assertThat(result.errors()).isEmpty();
         assertThat(result.componentName()).isEqualTo("Schematron Rules");
-        assertThat(validator.getLoadedCount()).isEqualTo(8);
+        assertThat(validator.getLoadedCount()).isEqualTo(9);
     }
 
     // ── Test 7 ──────────────────────────────────────────────────────────

@@ -33,6 +33,7 @@ import javax.xml.validation.Validator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -69,6 +70,25 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
     );
 
     /**
+     * GİB ürün paketlerinden gelen eArsivRaporu şemaları.
+     * <p>
+     * Bu paketlerdeki {@code eArsiv.xsd} dosyaları XAdES ve xmldsig şemalarını
+     * {@code xs:import} ile ister ama paketle birlikte göndermez. Söz konusu imza
+     * şemaları yalnızca genel e-Arşiv paketiyle geldiği için import'lar
+     * {@link #EARCHIVE_SHARED_SCHEMA_DIR} üzerinden çözülür.
+     */
+    private static final Set<SchemaValidationType> EARCHIVE_PRODUCT_TYPES = Set.of(
+            SchemaValidationType.EARCHIVE_EDOVIZ,
+            SchemaValidationType.EARCHIVE_EDEKONT,
+            SchemaValidationType.EARCHIVE_EGIDER_PUSULASI
+    );
+
+    /**
+     * Ürün paketlerinin ortak imza şemalarını (XAdES, xmldsig) paylaştığı dizin.
+     */
+    private static final String EARCHIVE_SHARED_SCHEMA_DIR = "validator/earchive/schema";
+
+    /**
      * Her UBL şema tipi için gerekli olan ortak XSD dosya yolları.
      * EARCHIVE ve EDEFTER gibi bağımsız XSD'ler için kullanılmaz.
      */
@@ -96,6 +116,10 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
             Map.entry(SchemaValidationType.CREDIT_NOTE, "validator/ubl-tr-package/schema/maindoc/UBL-CreditNote-2.1.xsd"),
             Map.entry(SchemaValidationType.APPLICATION_RESPONSE, "validator/ubl-tr-package/schema/maindoc/UBL-ApplicationResponse-2.1.xsd"),
             Map.entry(SchemaValidationType.EARCHIVE, "validator/earchive/schema/EArsiv.xsd"),
+            Map.entry(SchemaValidationType.EARCHIVE_EDOVIZ, "validator/earchive-edoviz/schema/eArsiv.xsd"),
+            Map.entry(SchemaValidationType.EARCHIVE_EDEKONT, "validator/earchive-edekont/schema/eArsiv.xsd"),
+            Map.entry(SchemaValidationType.EARCHIVE_EGIDER_PUSULASI,
+                    "validator/earchive-egider-pusulasi/schema/eArsiv.xsd"),
             Map.entry(SchemaValidationType.EDEFTER, "validator/eledger/schema/edefter.xsd")
     );
 
@@ -353,6 +377,7 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
 
         // Ana XSD'yi DOM olarak parse et ve override'ları uygula
         Path mainFile = assetManager.resolveAssetOnDisk(mainXsd);
+        configureLocalSchemaResolver(factory, schemaType, mainFile);
         Document mainDoc = parseXsdDocument(mainFile);
         OverrideApplyResult applyResult = applyOverrides(mainDoc, overrides);
 
@@ -640,12 +665,43 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
         // (örn: http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd).
         // LocalSchemaResourceResolver bu HTTP URL'leri lokal dosyalara yönlendirir
         // ve internet erişimi gerektirmez.
-        if (!UBL_TYPES.contains(type)) {
-            Path schemaDir = mainFile.getParent();
-            factory.setResourceResolver(new LocalSchemaResourceResolver(schemaDir));
-        }
+        configureLocalSchemaResolver(factory, type, mainFile);
 
         return factory.newSchema(sources.toArray(new StreamSource[0]));
+    }
+
+    private void configureLocalSchemaResolver(SchemaFactory factory, SchemaValidationType type, Path mainFile) {
+        if (UBL_TYPES.contains(type)) {
+            return;
+        }
+
+        if (EARCHIVE_PRODUCT_TYPES.contains(type)) {
+            Path sharedDir = resolveSharedEarchiveSchemaDir();
+            if (sharedDir != null) {
+                factory.setResourceResolver(
+                        new LocalSchemaResourceResolver(mainFile.getParent(), sharedDir));
+                return;
+            }
+            log.warn("Ortak e-Arşiv imza şemaları bulunamadı ({}). {} şemasının XAdES/xmldsig "
+                            + "import'ları çözülemeyebilir — earsiv paketini sync edin.",
+                    EARCHIVE_SHARED_SCHEMA_DIR, type);
+        }
+
+        factory.setResourceResolver(new LocalSchemaResourceResolver(mainFile.getParent()));
+    }
+
+    /**
+     * Ürün paketlerinin ortak imza şemalarını aradığı dizini döndürür.
+     *
+     * @return Dizin Path'i, external asset dizini yoksa veya dizin oluşmamışsa {@code null}
+     */
+    private Path resolveSharedEarchiveSchemaDir() {
+        Path externalDir = assetManager.getExternalDir();
+        if (externalDir == null) {
+            return null;
+        }
+        Path sharedDir = externalDir.resolve(EARCHIVE_SHARED_SCHEMA_DIR).normalize();
+        return Files.isDirectory(sharedDir) ? sharedDir : null;
     }
 
     private String formatError(org.xml.sax.SAXParseException e) {

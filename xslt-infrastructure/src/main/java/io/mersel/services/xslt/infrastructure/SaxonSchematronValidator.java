@@ -99,7 +99,9 @@ public class SaxonSchematronValidator implements ISchematronValidator, Reloadabl
      * Önceden derlenmiş Schematron XSL dosyaları. Doğrudan Saxon'a yüklenir.
      */
     private static final Map<SchematronValidationType, String> PRECOMPILED_XSL_MAP = Map.of(
-            SchematronValidationType.EARCHIVE_REPORT, "validator/earchive/schematron/earsiv_schematron.xsl"
+            SchematronValidationType.EARCHIVE_REPORT, "validator/earchive/schematron/earsiv_schematron.xsl",
+            SchematronValidationType.EARCHIVE_REPORT_EDOVIZ,
+            "validator/earchive-edoviz/schematron/earsiv_schematron.xsl"
     );
 
     /**

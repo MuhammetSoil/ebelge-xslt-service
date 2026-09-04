@@ -11,6 +11,9 @@ export const SCHEMA_VALIDATION_TYPES = [
   "CREDIT_NOTE",
   "APPLICATION_RESPONSE",
   "EARCHIVE",
+  "EARCHIVE_EDOVIZ",
+  "EARCHIVE_EDEKONT",
+  "EARCHIVE_EGIDER_PUSULASI",
   "EDEFTER",
 ] as const;
 
@@ -23,6 +26,7 @@ export type SchemaValidationType = (typeof SCHEMA_VALIDATION_TYPES)[number];
 export const SCHEMATRON_VALIDATION_TYPES = [
   "UBLTR_MAIN",
   "EARCHIVE_REPORT",
+  "EARCHIVE_REPORT_EDOVIZ",
   "EDEFTER_YEVMIYE",
   "EDEFTER_KEBIR",
   "EDEFTER_BERAT",
@@ -40,7 +44,12 @@ export const TRANSFORM_TYPES = [
   "DESPATCH_ADVICE",
   "RECEIPT_ADVICE",
   "EMM",
+  "ESMM",
   "ECHECK",
+  "EDOVIZ_ALIM",
+  "EDOVIZ_SATIM",
+  "EDEKONT",
+  "EGIDER_PUSULASI",
 ] as const;
 
 export type TransformType = (typeof TRANSFORM_TYPES)[number];
@@ -51,7 +60,12 @@ export const TRANSFORM_TYPE_LABELS: Record<TransformType, string> = {
   DESPATCH_ADVICE: "e-İrsaliye",
   RECEIPT_ADVICE: "e-İrsaliye Yanıt",
   EMM: "e-Müstahsil Makbuzu",
+  ESMM: "e-Serbest Meslek Makbuzu",
   ECHECK: "e-Adisyon",
+  EDOVIZ_ALIM: "e-Döviz Alım Belgesi",
+  EDOVIZ_SATIM: "e-Döviz Satım Belgesi",
+  EDEKONT: "e-Dekont",
+  EGIDER_PUSULASI: "e-Gider Pusulası",
 };
 
 // ─── Validation ─────────────────────────────────────────────────────
@@ -158,6 +172,7 @@ export interface ProfilesResponse {
 export interface FileMapping {
   zipPathPattern: string;
   targetDir: string;
+  targetFileName?: string;
 }
 
 export interface PackageTreeNode {

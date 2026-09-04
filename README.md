@@ -10,9 +10,9 @@ E-Fatura, E-İrsaliye, E-Arşiv ve diğer e-dönüşüm belgeleri için XML doğ
 
 ### Temel Özellikler
 
-- **XML Schema (XSD) Doğrulama** — 6 belge tipi desteği
-- **Schematron Doğrulama** — 8 tip: UBL-TR Main, EArchive, E-Defter (Yevmiye, Kebir, Berat, Rapor) + Envanter
-- **XSLT Dönüşüm** — 7 belge tipi: Invoice, ArchiveInvoice, DespatchAdvice, ReceiptAdvice, EMM, ESMM, ECheck
+- **XML Schema (XSD) Doğrulama** — 7 şema tipi; UBL belgeleri, e-Arşiv raporu ve e-Defter dahil
+- **Schematron Doğrulama** — 8 tip: UBL-TR Main, e-Arşiv, e-Defter ve Envanter
+- **XSLT Dönüşüm** — 11 belge tipi; e-Döviz Alım/Satım, e-Adisyon, e-Dekont ve e-Gider Pusulası dahil
 - **Otomatik Belge Tipi Tespiti** — XML root element'inden SAX parser ile otomatik algılama
 - **Gömülü XSLT Desteği** — Belge içindeki `EmbeddedDocumentBinaryObject` XSLT'yi otomatik çıkar ve kullan
 - **Runtime Schematron Derleme** — GİB UBL-TR ve e-Defter kaynak dosyalarından ISO 3-adım pipeline ile otomatik derleme
@@ -134,6 +134,9 @@ curl -X POST http://localhost:8080/v1/validate \
 ```json
 {
   "result": {
+    "detectedDocumentType": "INVOICE",
+    "appliedXsd": "UBL-Invoice-2.1.xsd",
+    "appliedSchematron": "UBLTR_MAIN",
     "validSchema": true,
     "validSchematron": false,
     "schemaValidationErrors": [],
@@ -202,6 +205,8 @@ Başarılı dönüşümde **ham HTML** döner (`text/html`). Metadata, response 
 2. `useEmbeddedXslt=true` ve belgede gömülü XSLT varsa → belgeden çıkar ve kullan
 3. Hiçbiri yoksa → varsayılan XSLT şablonu
 
+> **DOCTYPE sınırı:** Gömülü XSLT içinde tanımlanan dahili entity subset'leri desteklenir. Harici DTD/entity çözümlemesi güvenlik nedeniyle kapalıdır; yalnızca harici DTD'de tanımlanan entity'lere bağımlı şablonlar kullanılmaz ve varsayılan XSLT'ye dönülür.
+
 ```bash
 # Varsayılan XSLT ile
 curl -v -X POST http://localhost:8080/v1/transform \
@@ -265,7 +270,7 @@ curl -X POST http://localhost:8080/v1/admin/assets/reload
 
 ### GİB Paket Sync
 
-GİB resmi web sitesinden e-Fatura, UBL-TR XSD, e-Arşiv ve e-Defter paketlerini indirir, ZIP'ten çıkartır ve asset dizinine yerleştirir.
+GİB resmi web sitesinden e-Fatura, UBL-TR XSD, e-Arşiv, e-Döviz, e-Dekont, e-Gider Pusulası ve e-Defter paketlerini indirir; ZIP/RAR arşivlerini asset dizinine yerleştirir.
 
 ```bash
 # Tüm paketleri sync et
@@ -285,6 +290,9 @@ curl http://localhost:8080/v1/admin/packages
 | UBL-TR Şematron | `validator/ubl-tr-package/schematron/` |
 | UBL-TR XSD | `validator/ubl-tr-package/schema/` |
 | e-Arşiv | `validator/earchive/` |
+| e-Döviz ve Kıymetli Maden | `default_transformers/`, `validator/earchive-edoviz/` |
+| e-Dekont | `default_transformers/`, `validator/earchive-edekont/` |
+| e-Gider Pusulası | `default_transformers/`, `validator/earchive-egider-pusulasi/` |
 | e-Defter | `validator/eledger/` |
 
 ## Desteklenen Doğrulama Tipleri
@@ -296,9 +304,32 @@ curl http://localhost:8080/v1/admin/packages
 | `INVOICE` | UBL 2.1 Fatura |
 | `DESPATCH_ADVICE` | UBL 2.1 İrsaliye |
 | `RECEIPT_ADVICE` | UBL 2.1 İrsaliye Yanıt |
-| `CREDIT_NOTE` | UBL 2.1 Müstahsil Makbuzu |
-| `FREELANCER_VOUCHER` | UBL 2.1 Serbest Meslek Makbuzu |
-| `EARCHIVE_REPORT` | E-Arşiv Rapor |
+| `CREDIT_NOTE` | UBL 2.1 CreditNote (e-Döviz, e-Dekont ve e-Gider Pusulası dahil) |
+| `APPLICATION_RESPONSE` | UBL 2.1 Uygulama Yanıtı |
+| `EARCHIVE` | Genel e-Arşiv Raporu (fatura, mustahsil/serbest meslek makbuzu, adisyon, mRapor, ymRapor) |
+| `EARCHIVE_EDOVIZ` | e-Döviz ve Kıymetli Maden Raporu (`belge`) |
+| `EARCHIVE_EDEKONT` | e-Dekont Raporu (`bankReceipt`) |
+| `EARCHIVE_EGIDER_PUSULASI` | e-Gider Pusulası Raporu (`eGiderPusulasi`) |
+| `EDEFTER` | e-Defter |
+
+> **Doğrulama kapsamı:** e-Döviz, e-Dekont ve e-Gider Pusulası **belgeleri** UBL
+> `CreditNote` kökünü kullanır; belge türü root element'ten belirlendiği için bu
+> belgeler ek bir yapılandırma gerekmeden `UBL-CreditNote-2.1.xsd` ve `UBLTR_MAIN`
+> ile doğrulanır.
+>
+> Aynı paketlerdeki **rapor** dosyaları da `eArsivRaporu` kökünü kullanır, ancak
+> GİB bu kökü her ürün paketinde farklı bir `eArsiv.xsd` ile yayınlıyor. Şemalar
+> aynı namespace'te aynı kök elementi farklı içerik modelleriyle tanımladığı ve
+> sekiz tip adını aynı isimle farklı şekilde tanımladığı için birleştirilemezler —
+> hepsini tek `SchemaFactory`'ye vermek hata üretmez ama sessizce yalnızca ilkini
+> kullanır. Bu nedenle rapor ailesi `baslik`'tan sonraki içerik elemanına göre
+> belirlenir ve her aile kendi şemasıyla doğrulanır. Tanınmayan içerik elemanları
+> genel `EARCHIVE` şemasına düşer.
+>
+> `bankReceipt` genel pakette de tanımlıdır ama içerik modeli e-Dekont paketindeki
+> sürümden farklıdır. Her iki sürüm de aynı üç ürünü (`DEKONT`, vergi ve gümrük
+> vergi tahsil alındısı) kapsadığı, GİB'in örnek raporları paket sürümüne uyduğu ve
+> o sürüm belirgin biçimde daha kapsamlı olduğu için ürün paketi şeması esas alınır.
 
 ### Schematron
 
@@ -306,6 +337,7 @@ curl http://localhost:8080/v1/admin/packages
 |-----|--------|----------|
 | `UBLTR_MAIN` | Runtime derleme (XML) | UBL-TR Ana Schematron |
 | `EARCHIVE_REPORT` | Pre-compiled XSL | E-Arşiv Rapor Schematron |
+| `EARCHIVE_REPORT_EDOVIZ` | Pre-compiled XSL | e-Döviz Rapor Schematron |
 | `EDEFTER_YEVMIYE` | Runtime derleme (SCH) | E-Defter Yevmiye |
 | `EDEFTER_KEBIR` | Runtime derleme (SCH) | E-Defter Kebir |
 | `EDEFTER_BERAT` | Runtime derleme (SCH) | E-Defter Berat |
@@ -324,6 +356,12 @@ curl http://localhost:8080/v1/admin/packages
 | `EMM` | E-Müstahsil Makbuzu |
 | `ESMM` | E-Serbest Meslek Makbuzu |
 | `ECHECK` | E-Adisyon |
+| `EDOVIZ_ALIM` | e-Döviz/Kıymetli Maden Alım Belgesi |
+| `EDOVIZ_SATIM` | e-Döviz/Kıymetli Maden Satım Belgesi |
+| `EDEKONT` | e-Dekont |
+| `EGIDER_PUSULASI` | e-Gider Pusulası |
+
+> **Şablon notu:** GİB e-Döviz ve e-Gider Pusulası paketlerindeki XSLT'ler paket sync ile yüklenir. e-Dekont paketinde XSLT ayrı bir dosya olarak bulunmadığından sync sırasında resmi örnek XML'in içinden çıkarılıp `eDekont_Base.xslt` adıyla kaydedilir. e-Adisyon için indirilebilir paket yayımlanmadığından `eAdisyon_Base.xslt` admin XSLT yönetiminden veya external asset dizininden sağlanmalıdır.
 
 ## Doğrulama Profilleri
 
@@ -447,7 +485,12 @@ custom-assets/
 │   ├── eDespatch_Base.xslt
 │   ├── eDespatch_Answer_Base.xslt
 │   ├── eMM_Base.xslt
-│   └── eSMM_Base.xslt
+│   ├── eSMM_Base.xslt
+│   ├── eAdisyon_Base.xslt
+│   ├── eDovizAlim_Base.xslt
+│   ├── eDovizSatim_Base.xslt
+│   ├── eDekont_Base.xslt
+│   └── eGiderPusulasi_Base.xslt
 ├── validator/
 │   ├── ubl-tr-package/                # UBL-TR paket dosyaları
 │   │   ├── schematron/                # GİB kaynak Schematron XML'leri
