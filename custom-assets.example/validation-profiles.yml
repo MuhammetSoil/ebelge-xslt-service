@@ -21,9 +21,9 @@
 #
 #   Kabul edilen scope değerleri:
 #     Schema Tipleri:     INVOICE, DESPATCH_ADVICE, RECEIPT_ADVICE,
-#                         CREDIT_NOTE, APPLICATION_RESPONSE, EARCHIVE,
-#                         EARCHIVE_EDOVIZ, EARCHIVE_EDEKONT,
-#                         EARCHIVE_EGIDER_PUSULASI, EDEFTER
+#                         CREDIT_NOTE, APPLICATION_RESPONSE, EARCHIVE_REPORT,
+#                         EARCHIVE_REPORT_EDOVIZ, EARCHIVE_REPORT_EDEKONT,
+#                         EARCHIVE_REPORT_EGIDER_PUSULASI, EDEFTER
 #     Schematron Tipleri: UBLTR_MAIN, EARCHIVE_REPORT, EARCHIVE_REPORT_EDOVIZ,
 #                         EDEFTER_YEVMIYE, EDEFTER_KEBIR, EDEFTER_BERAT,
 #                         EDEFTER_RAPOR, ENVANTER_BERAT, ENVANTER_DEFTER

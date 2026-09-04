@@ -75,9 +75,9 @@ class JaxpSchemaValidatorReloadTest {
                 .as("temel paketlerin eksikliği hâlâ hata olarak raporlanmalı")
                 .contains(SchemaValidationType.INVOICE.name())
                 .as("ayrı dağıtılan ürün paketleri hata üretmemeli")
-                .doesNotContain(SchemaValidationType.EARCHIVE_EDOVIZ.name())
-                .doesNotContain(SchemaValidationType.EARCHIVE_EDEKONT.name())
-                .doesNotContain(SchemaValidationType.EARCHIVE_EGIDER_PUSULASI.name());
+                .doesNotContain(SchemaValidationType.EARCHIVE_REPORT_EDOVIZ.name())
+                .doesNotContain(SchemaValidationType.EARCHIVE_REPORT_EDEKONT.name())
+                .doesNotContain(SchemaValidationType.EARCHIVE_REPORT_EGIDER_PUSULASI.name());
     }
 
     @Test
@@ -90,7 +90,7 @@ class JaxpSchemaValidatorReloadTest {
 
         ReloadResult result = createValidator().reload();
 
-        assertThat(reportedErrors(result)).contains(SchemaValidationType.EARCHIVE_EDOVIZ.name());
+        assertThat(reportedErrors(result)).contains(SchemaValidationType.EARCHIVE_REPORT_EDOVIZ.name());
     }
 
     /**

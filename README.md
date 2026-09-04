@@ -306,10 +306,10 @@ curl http://localhost:8080/v1/admin/packages
 | `RECEIPT_ADVICE` | UBL 2.1 İrsaliye Yanıt |
 | `CREDIT_NOTE` | UBL 2.1 CreditNote (e-Döviz, e-Dekont ve e-Gider Pusulası dahil) |
 | `APPLICATION_RESPONSE` | UBL 2.1 Uygulama Yanıtı |
-| `EARCHIVE` | Genel e-Arşiv Raporu (fatura, mustahsil/serbest meslek makbuzu, adisyon, mRapor, ymRapor) |
-| `EARCHIVE_EDOVIZ` | e-Döviz ve Kıymetli Maden Raporu (`belge`) |
-| `EARCHIVE_EDEKONT` | e-Dekont Raporu (`bankReceipt`) |
-| `EARCHIVE_EGIDER_PUSULASI` | e-Gider Pusulası Raporu (`eGiderPusulasi`) |
+| `EARCHIVE_REPORT` | Genel e-Arşiv Raporu (fatura, mustahsil/serbest meslek makbuzu, adisyon, mRapor, ymRapor) |
+| `EARCHIVE_REPORT_EDOVIZ` | e-Döviz ve Kıymetli Maden Raporu (`belge`) |
+| `EARCHIVE_REPORT_EDEKONT` | e-Dekont Raporu (`bankReceipt`) |
+| `EARCHIVE_REPORT_EGIDER_PUSULASI` | e-Gider Pusulası Raporu (`eGiderPusulasi`) |
 | `EDEFTER` | e-Defter |
 
 > **Doğrulama kapsamı:** e-Döviz, e-Dekont ve e-Gider Pusulası **belgeleri** UBL
@@ -324,7 +324,7 @@ curl http://localhost:8080/v1/admin/packages
 > hepsini tek `SchemaFactory`'ye vermek hata üretmez ama sessizce yalnızca ilkini
 > kullanır. Bu nedenle rapor ailesi `baslik`'tan sonraki içerik elemanına göre
 > belirlenir ve her aile kendi şemasıyla doğrulanır. Tanınmayan içerik elemanları
-> genel `EARCHIVE` şemasına düşer.
+> genel `EARCHIVE_REPORT` şemasına düşer.
 >
 > `bankReceipt` genel pakette de tanımlıdır ama içerik modeli e-Dekont paketindeki
 > sürümden farklıdır. Her iki sürüm de aynı üç ürünü (`DEKONT`, vergi ve gümrük

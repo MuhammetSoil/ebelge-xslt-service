@@ -81,9 +81,9 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
      * paketi sync edilmemişse {@link #reload()} bunları hata saymaz, atlar.
      */
     private static final Set<SchemaValidationType> EARCHIVE_PRODUCT_TYPES = Set.of(
-            SchemaValidationType.EARCHIVE_EDOVIZ,
-            SchemaValidationType.EARCHIVE_EDEKONT,
-            SchemaValidationType.EARCHIVE_EGIDER_PUSULASI
+            SchemaValidationType.EARCHIVE_REPORT_EDOVIZ,
+            SchemaValidationType.EARCHIVE_REPORT_EDEKONT,
+            SchemaValidationType.EARCHIVE_REPORT_EGIDER_PUSULASI
     );
 
     /**
@@ -118,10 +118,10 @@ public class JaxpSchemaValidator implements ISchemaValidator, Reloadable {
             Map.entry(SchemaValidationType.RECEIPT_ADVICE, "validator/ubl-tr-package/schema/maindoc/UBL-ReceiptAdvice-2.1.xsd"),
             Map.entry(SchemaValidationType.CREDIT_NOTE, "validator/ubl-tr-package/schema/maindoc/UBL-CreditNote-2.1.xsd"),
             Map.entry(SchemaValidationType.APPLICATION_RESPONSE, "validator/ubl-tr-package/schema/maindoc/UBL-ApplicationResponse-2.1.xsd"),
-            Map.entry(SchemaValidationType.EARCHIVE, "validator/earchive/schema/EArsiv.xsd"),
-            Map.entry(SchemaValidationType.EARCHIVE_EDOVIZ, "validator/earchive-edoviz/schema/eArsiv.xsd"),
-            Map.entry(SchemaValidationType.EARCHIVE_EDEKONT, "validator/earchive-edekont/schema/eArsiv.xsd"),
-            Map.entry(SchemaValidationType.EARCHIVE_EGIDER_PUSULASI,
+            Map.entry(SchemaValidationType.EARCHIVE_REPORT, "validator/earchive/schema/EArsiv.xsd"),
+            Map.entry(SchemaValidationType.EARCHIVE_REPORT_EDOVIZ, "validator/earchive-edoviz/schema/eArsiv.xsd"),
+            Map.entry(SchemaValidationType.EARCHIVE_REPORT_EDEKONT, "validator/earchive-edekont/schema/eArsiv.xsd"),
+            Map.entry(SchemaValidationType.EARCHIVE_REPORT_EGIDER_PUSULASI,
                     "validator/earchive-egider-pusulasi/schema/eArsiv.xsd"),
             Map.entry(SchemaValidationType.EDEFTER, "validator/eledger/schema/edefter.xsd")
     );
