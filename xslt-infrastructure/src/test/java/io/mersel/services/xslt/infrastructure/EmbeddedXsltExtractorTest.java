@@ -218,4 +218,31 @@ class EmbeddedXsltExtractorTest {
         byte[] result = extractor.extract("this is not xml".getBytes());
         assertThat(result).isNull();
     }
+    @Test
+    @DisplayName("Kısa biçimli XSLT namespace'e göre tanınmalı; sıradan HTML reddedilmeli")
+    void shouldRecognizeOnlyNamespaceQualifiedSimplifiedStylesheets() {
+        String[] candidates = {
+                "<html xmlns:t='http://www.w3.org/1999/XSL/Transform' t:version='2.0'/>",
+                "<html version='2.0'/>",
+                "<html xmlns:t='urn:other' t:version='2.0'/>",
+                "<html xmlns:t='http://www.w3.org/1999/XSL/Transform' t:version=' '/>"
+        };
+        for (int i = 0; i < candidates.length; i++) {
+            String xml = """
+                    <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                             xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                        <cac:AdditionalDocumentReference><cac:Attachment>
+                            <cbc:EmbeddedDocumentBinaryObject filename="style.xslt">%s</cbc:EmbeddedDocumentBinaryObject>
+                        </cac:Attachment></cac:AdditionalDocumentReference>
+                    </Invoice>""".formatted(Base64.getEncoder().encodeToString(
+                            candidates[i].getBytes(StandardCharsets.UTF_8)));
+            byte[] result = extractor.extract(xml.getBytes(StandardCharsets.UTF_8));
+            if (i == 0) {
+                assertThat(result).isEqualTo(candidates[i].getBytes(StandardCharsets.UTF_8));
+            } else {
+                assertThat(result).as(candidates[i]).isNull();
+            }
+        }
+    }
+
 }

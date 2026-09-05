@@ -181,4 +181,33 @@ class SaxonXsltTransformerTest {
         verify(assetManager).assetExists("default_transformers/eDekont_Base.xslt");
         verify(assetManager).assetExists("default_transformers/eGiderPusulasi_Base.xslt");
     }
+
+    @Test
+    @DisplayName("Kısa biçimli gömülü XSLT varsayılan şablona düşmeden dönüştürülmeli")
+    void shouldTransformWithSimplifiedEmbeddedStylesheet() throws Exception {
+        String xslt = """
+                <html xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xsl:version="2.0">
+                    <body><xsl:value-of select="/*/local-name()"/></body>
+                </html>""";
+        String xml = """
+                <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+                    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+                    <cac:AdditionalDocumentReference><cac:Attachment>
+                    <cbc:EmbeddedDocumentBinaryObject filename="style.xslt">%s</cbc:EmbeddedDocumentBinaryObject>
+                    </cac:Attachment></cac:AdditionalDocumentReference>
+                </Invoice>""".formatted(Base64.getEncoder().encodeToString(xslt.getBytes(StandardCharsets.UTF_8)));
+        var request = new TransformRequest();
+        request.setTransformType(TransformType.INVOICE);
+        request.setDocument(xml.getBytes(StandardCharsets.UTF_8));
+        request.setUseEmbeddedXslt(true);
+
+        var result = transformer.transform(request);
+
+        assertThat(result.isEmbeddedXsltUsed()).isTrue();
+        assertThat(result.isDefaultXslUsed()).isFalse();
+        assertThat(result.getCustomXsltError()).isNull();
+        assertThat(new String(result.getHtmlContent(), StandardCharsets.UTF_8)).contains("Invoice");
+    }
+
 }

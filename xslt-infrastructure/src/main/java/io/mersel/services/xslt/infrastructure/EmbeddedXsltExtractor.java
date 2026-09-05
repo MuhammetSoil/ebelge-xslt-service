@@ -127,8 +127,12 @@ public class EmbeddedXsltExtractor {
                 return false;
             }
             var root = document.getDocumentElement();
-            return XSLT_NS.equals(root.getNamespaceURI())
-                    && ("stylesheet".equals(root.getLocalName()) || "transform".equals(root.getLocalName()));
+            if (XSLT_NS.equals(root.getNamespaceURI())) {
+                return "stylesheet".equals(root.getLocalName()) || "transform".equals(root.getLocalName());
+            }
+            // Simplified stylesheets use a literal result element (e.g. html) as
+            // their root, with a namespace-qualified xsl:version attribute.
+            return !root.getAttributeNS(XSLT_NS, "version").isBlank();
         } catch (Exception e) {
             return false;
         }
