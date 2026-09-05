@@ -56,13 +56,16 @@ public class DocumentTypeDetector implements IDocumentTypeDetector {
      * GİB bu ürünleri kendi paketlerindeki {@code eArsiv.xsd} ile yayınlıyor; şemalar
      * aynı namespace'te aynı kök elementi farklı içerik modelleriyle tanımladığı için
      * birleştirilemez. Listede olmayan içerik elementleri (fatura, mustahsilMakbuz,
-     * serbestMeslekMakbuz, adisyon, mRapor, ymRapor) genel e-Arşiv paketi şemasına düşer.
+     * serbestMeslekMakbuz, mRapor, ymRapor) genel e-Arşiv paketi şemasına düşer.
+     * e-Adisyon da genel XSD kullanır; uyumsuz Schematron'u atlamak için ayrı türdür.
      * <p>
      * {@code bankReceipt} genel pakette de tanımlı ama içerik modeli e-Dekont paketindeki
      * sürümden farklı. GİB'in e-Dekont rapor örnekleri paket sürümüne uyduğu ve o sürüm
      * belirgin biçimde daha kapsamlı olduğu için ürün paketi şeması esas alınır.
      */
     private static final Map<String, DocumentType> EARCHIVE_CONTENT_MAP = Map.of(
+            "adisyon", DocumentType.EARCHIVE_REPORT_EADISYON,
+            "adisyonIptal", DocumentType.EARCHIVE_REPORT_EADISYON,
             "belge", DocumentType.EARCHIVE_REPORT_EDOVIZ,
             "belgeIptal", DocumentType.EARCHIVE_REPORT_EDOVIZ,
             "bankReceipt", DocumentType.EARCHIVE_REPORT_EDEKONT,

@@ -35,10 +35,11 @@ class DocumentTypeMappingTest {
     }
 
     @Test
-    @DisplayName("Her eArsivRaporu ailesi ayrı bir şema dizini kullanmalı")
+    @DisplayName("Farklı paketlerin eArsivRaporu şemaları ayrı dizinlerde tutulmalı")
     void earchiveReportFamiliesShouldUseSeparateSchemaDirectories() {
         var reportSchemaPaths = DocumentTypeMapping.XSD_PATH_MAP.entrySet().stream()
                 .filter(entry -> entry.getKey().name().startsWith("EARCHIVE_REPORT"))
+                .filter(entry -> entry.getKey() != DocumentType.EARCHIVE_REPORT_EADISYON)
                 .map(Map.Entry::getValue)
                 .toList();
 
@@ -52,9 +53,9 @@ class DocumentTypeMappingTest {
     @Test
     @DisplayName("Schematron göndermeyen rapor aileleri Schematron adımını atlamalı")
     void reportFamiliesWithoutSchematronShouldBeAbsentFromSchematronMap() {
-        // e-Dekont ve e-Gider Pusulası paketlerinde Schematron dosyası yok.
+        // e-Adisyon için genel Schematron uyumsuz; diğer iki özel pakette dosya yok.
         assertThat(DocumentTypeMapping.SCHEMATRON_MAP)
-                .doesNotContainKeys(DocumentType.EARCHIVE_REPORT_EDEKONT,
+                .doesNotContainKeys(DocumentType.EARCHIVE_REPORT_EADISYON, DocumentType.EARCHIVE_REPORT_EDEKONT,
                         DocumentType.EARCHIVE_REPORT_EGIDER_PUSULASI);
         assertThat(DocumentTypeMapping.getSchematronFileName(DocumentType.EARCHIVE_REPORT_EDEKONT)).isNull();
 

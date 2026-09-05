@@ -28,6 +28,7 @@ public final class DocumentTypeMapping {
             Map.entry(DocumentType.RECEIPT_ADVICE, SchemaValidationType.RECEIPT_ADVICE),
             Map.entry(DocumentType.APPLICATION_RESPONSE, SchemaValidationType.APPLICATION_RESPONSE),
             Map.entry(DocumentType.EARCHIVE_REPORT, SchemaValidationType.EARCHIVE_REPORT),
+            Map.entry(DocumentType.EARCHIVE_REPORT_EADISYON, SchemaValidationType.EARCHIVE_REPORT),
             Map.entry(DocumentType.EARCHIVE_REPORT_EDOVIZ, SchemaValidationType.EARCHIVE_REPORT_EDOVIZ),
             Map.entry(DocumentType.EARCHIVE_REPORT_EDEKONT, SchemaValidationType.EARCHIVE_REPORT_EDEKONT),
             Map.entry(DocumentType.EARCHIVE_REPORT_EGIDER_PUSULASI, SchemaValidationType.EARCHIVE_REPORT_EGIDER_PUSULASI),
@@ -49,8 +50,8 @@ public final class DocumentTypeMapping {
             Map.entry(DocumentType.RECEIPT_ADVICE, SchematronValidationType.UBLTR_MAIN),
             Map.entry(DocumentType.APPLICATION_RESPONSE, SchematronValidationType.UBLTR_MAIN),
             Map.entry(DocumentType.EARCHIVE_REPORT, SchematronValidationType.EARCHIVE_REPORT),
-            // e-Dekont ve e-Gider Pusulası paketleri Schematron göndermiyor; o türler
-            // burada yer almaz ve Schematron adımı atlanır.
+            // e-Adisyon, e-Dekont ve e-Gider Pusulası için uyumlu rapor Schematron
+            // bulunmadığından bu türler burada yer almaz; yalnızca XSD uygulanır.
             Map.entry(DocumentType.EARCHIVE_REPORT_EDOVIZ, SchematronValidationType.EARCHIVE_REPORT_EDOVIZ),
             Map.entry(DocumentType.EDEFTER_YEVMIYE, SchematronValidationType.EDEFTER_YEVMIYE),
             Map.entry(DocumentType.EDEFTER_KEBIR, SchematronValidationType.EDEFTER_KEBIR),
@@ -71,6 +72,7 @@ public final class DocumentTypeMapping {
             Map.entry(DocumentType.RECEIPT_ADVICE, "validator/ubl-tr-package/schema/maindoc/UBL-ReceiptAdvice-2.1.xsd"),
             Map.entry(DocumentType.APPLICATION_RESPONSE, "validator/ubl-tr-package/schema/maindoc/UBL-ApplicationResponse-2.1.xsd"),
             Map.entry(DocumentType.EARCHIVE_REPORT, "validator/earchive/schema/EArsiv.xsd"),
+            Map.entry(DocumentType.EARCHIVE_REPORT_EADISYON, "validator/earchive/schema/EArsiv.xsd"),
             Map.entry(DocumentType.EARCHIVE_REPORT_EDOVIZ, "validator/earchive-edoviz/schema/eArsiv.xsd"),
             Map.entry(DocumentType.EARCHIVE_REPORT_EDEKONT, "validator/earchive-edekont/schema/eArsiv.xsd"),
             Map.entry(DocumentType.EARCHIVE_REPORT_EGIDER_PUSULASI,

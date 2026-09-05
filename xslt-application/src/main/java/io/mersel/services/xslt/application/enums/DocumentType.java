@@ -20,6 +20,7 @@ public enum DocumentType {
     // Şemalar aynı namespace'te aynı kök elementi farklı içerik modelleriyle tanımladığı
     // için birleştirilemezler; rapor ailesi başına ayrı bir tür gerekir.
     EARCHIVE_REPORT,
+    EARCHIVE_REPORT_EADISYON,
     EARCHIVE_REPORT_EDOVIZ,
     EARCHIVE_REPORT_EDEKONT,
     EARCHIVE_REPORT_EGIDER_PUSULASI,

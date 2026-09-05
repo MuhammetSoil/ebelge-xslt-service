@@ -210,7 +210,7 @@ class DocumentTypeDetectorTest {
         }
 
         @Test
-        @DisplayName("e-Adisyon rapor içeriği → EARCHIVE_REPORT")
+        @DisplayName("e-Adisyon rapor içeriği → EARCHIVE_REPORT_EADISYON")
         void detect_echeckReport() throws Exception {
             byte[] xml = xml("""
                     <eArsivRaporu xmlns="http://earsiv.efatura.gov.tr">
@@ -219,11 +219,11 @@ class DocumentTypeDetectorTest {
                     </eArsivRaporu>
                     """);
 
-            assertThat(detector.detect(xml)).isEqualTo(DocumentType.EARCHIVE_REPORT);
+            assertThat(detector.detect(xml)).isEqualTo(DocumentType.EARCHIVE_REPORT_EADISYON);
         }
 
         @Test
-        @DisplayName("e-Adisyon iptal raporu → EARCHIVE_REPORT")
+        @DisplayName("e-Adisyon iptal raporu → EARCHIVE_REPORT_EADISYON")
         void detect_echeckCancellationReport() throws Exception {
             byte[] xml = xml("""
                     <eArsivRaporu xmlns="http://earsiv.efatura.gov.tr">
@@ -232,7 +232,7 @@ class DocumentTypeDetectorTest {
                     </eArsivRaporu>
                     """);
 
-            assertThat(detector.detect(xml)).isEqualTo(DocumentType.EARCHIVE_REPORT);
+            assertThat(detector.detect(xml)).isEqualTo(DocumentType.EARCHIVE_REPORT_EADISYON);
         }
 
         @Test

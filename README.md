@@ -317,19 +317,48 @@ curl http://localhost:8080/v1/admin/packages
 > belgeler ek bir yapılandırma gerekmeden `UBL-CreditNote-2.1.xsd` ve `UBLTR_MAIN`
 > ile doğrulanır.
 >
-> Aynı paketlerdeki **rapor** dosyaları da `eArsivRaporu` kökünü kullanır, ancak
-> GİB bu kökü her ürün paketinde farklı bir `eArsiv.xsd` ile yayınlıyor. Şemalar
-> aynı namespace'te aynı kök elementi farklı içerik modelleriyle tanımladığı ve
-> sekiz tip adını aynı isimle farklı şekilde tanımladığı için birleştirilemezler —
-> hepsini tek `SchemaFactory`'ye vermek hata üretmez ama sessizce yalnızca ilkini
-> kullanır. Bu nedenle rapor ailesi `baslik`'tan sonraki içerik elemanına göre
-> belirlenir ve her aile kendi şemasıyla doğrulanır. Tanınmayan içerik elemanları
-> genel `EARCHIVE_REPORT` şemasına düşer.
->
-> `bankReceipt` genel pakette de tanımlıdır ama içerik modeli e-Dekont paketindeki
-> sürümden farklıdır. Her iki sürüm de aynı üç ürünü (`DEKONT`, vergi ve gümrük
-> vergi tahsil alındısı) kapsadığı, GİB'in örnek raporları paket sürümüne uyduğu ve
-> o sürüm belirgin biçimde daha kapsamlı olduğu için ürün paketi şeması esas alınır.
+### e-Arşiv raporlarında paket seçimi
+
+İncelenen GİB paketlerinde aynı `eArsivRaporu` kökü ve `http://earsiv.efatura.gov.tr`
+namespace'i ile **4 farklı XSD, 9 rapor grubu** bulunur (iptal/itirazlar ayrı grup sayılmaz).
+Kök ve namespace tek başına yeterli değildir; servis `baslik` dışındaki ilk kayıt
+adından rapor ailesini seçer. Tanınmayan kayıtlar genel e-Arşiv doğrulamasına gider.
+
+| Rapor grubu | Kayıtlar (`baslik` dışında) | XSD kaynağı | Uygulanan Schematron |
+|---|---|---|---|
+| e-Arşiv fatura | `fatura`, `faturaIptal`, `faturaItiraz` | Genel e-Arşiv 1.1.8 | Genel paket |
+| e-Müstahsil Makbuzu | `mustahsilMakbuz`, `mustahsilMakbuzIptal` | Genel e-Arşiv 1.1.8 | Genel paket |
+| e-Serbest Meslek Makbuzu | `serbestMeslekMakbuz`, `serbestMeslekMakbuzIptal`, `serbestMeslekMakbuzItiraz` | Genel e-Arşiv 1.1.8 | Genel paket |
+| Eski nesil ÖKC mali raporu | `mRapor` | Genel e-Arşiv 1.1.8 | Genel paket |
+| Yeni nesil ÖKC mali raporu | `ymRapor` | Genel e-Arşiv 1.1.8 | Genel paket |
+| e-Adisyon | `adisyon`, `adisyonIptal` | Genel e-Arşiv 1.1.8 | **Atlanır:** genel Schematron uyumsuz; ayrı rapor Schematron'u yok |
+| e-Dekont | `bankReceipt`, `bankReceiptIptal` | e-Dekont paketi | **Atlanır:** özel pakette yok, genel Schematron uyumsuz |
+| e-Döviz / Kıymetli Maden Alım–Satım | `belge`, `belgeIptal` | e-Döviz paketi v1.2 | Kendi paketi |
+| e-Gider Pusulası | `eGiderPusulasi`, `eGiderPusulasiIptal` | e-Gider Pusulası paketi | **Atlanır:** özel pakette yok, genel Schematron uyumsuz |
+
+- Genel Schematron'un zorunlu kayıt kuralı yalnızca tablonun ilk beş grubunu kabul eder;
+  diğer grupları tek başına içeren raporlarda hatalı ret üretir. e-Döviz paketindeki
+  `earsiv_schematron.xsl`, genel paketle aynı adlı olsa da farklı kurallar içerir.
+- Genel XSD'deki `bankReceipt` ile e-Dekont paketindeki tanım uyumlu değildir
+  (ör. `ReceiptProfileID` / `ProfileID`, `dekontNo` / `DekontNo`, alan sırası ve kod listeleri).
+  **e-Dekont için yalnızca kendi paketindeki XSD kullanılır.** Aynı namespace'teki
+  farklı şemalar birleştirilmez; ürün paketleri ayrı dizinlerde tutulur.
+- Ürün XSD'lerinin içe aktardığı `XAdES.xsd`, `XAdESv141.xsd` ve
+  `xmldsig-core-schema.xsd` ortak bağımlılıkları genel e-Arşiv paketinden çözülür.
+  Örnek XML'e gömülü veya paketteki görüntüleme XSLT'si, rapor Schematron'u değildir.
+- **e-Adisyon, e-Dekont ve e-Gider Pusulası raporlarında yalnızca XSD doğrulanır; genel
+  Schematron'a geri dönüş yapılmaz.** e-Adisyon, `EARCHIVE_REPORT_EADISYON` olarak
+  tespit edilir ve `EARCHIVE_REPORT` XSD'sini kullanır. Atlanan adım için API'de
+  `appliedSchematron` / `appliedSchematronPath` boş, hata listesi boş ve
+  `validSchematron=true` döner; bu değer Schematron çalıştırıldığı anlamına gelmez.
+  XSD hataları sonucu geçersiz kılmaya devam eder. Bu politika raporlara aittir;
+  UBL `CreditNote` belgelerinin doğrulamasını değiştirmez.
+
+Kaynak paketler: [e-Arşiv 1.1.8](https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/earsiv_paket_v1.1_8.zip),
+[e-Döviz v1.2](https://ebelge.gib.gov.tr/dosyalar/e-doviz_ve_kiymetlimaden_alim-satim_paketi_v1.2.rar),
+[e-Dekont](https://ebelge.gib.gov.tr/dosyalar/eDekont_Paketi.rar),
+[e-Gider Pusulası](https://ebelge.gib.gov.tr/dosyalar/kilavuzlar/e-Gider_Pusulasi_Paketi.rar).
+Paket inceleme tarihi: 05.09.2026.
 
 ### Schematron
 
